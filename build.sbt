@@ -1,9 +1,9 @@
 
-name := "squbs-hello"
+name := "hello-squbs"
 
 version := "0.1.0-SNAPSHOT"
 
-organization in ThisBuild := "me.rotemfo"
+organization in ThisBuild := "me.rotemfo.squbs.hello.hello-squbs"
 
 scalaVersion := "2.12.8"
 
@@ -11,23 +11,22 @@ crossPaths := false
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8")
-
-import Versions._
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-encoding", "utf8", "-language:postfixOps")
 
 Revolver.settings
 
 libraryDependencies ++= Seq(
-  "ch.qos.logback"     % "logback-classic"     % logbackVer,
-  "org.squbs"         %% "squbs-unicomplex"    % squbsVer,
-  "org.squbs"         %% "squbs-actormonitor"  % squbsVer,
-  "org.squbs"         %% "squbs-actorregistry" % squbsVer,
-  "org.squbs"         %% "squbs-httpclient"    % squbsVer,
-  "org.squbs"         %% "squbs-admin"         % squbsVer,
-  "org.json4s"        %% "json4s-native"       % json4sVer,
-  "de.heikoseeberger" %% "akka-http-json4s"    % akkaHttpJson4sVer,
-  "org.squbs"         %% "squbs-testkit"       % squbsVer           % Test,
-  "com.typesafe.akka" %% "akka-http-testkit"   % akkaHttpVer        % Test
+  "ch.qos.logback"     % "logback-classic"     % Versions.logbackClassicV,
+  "org.squbs"         %% "squbs-unicomplex"    % Versions.squbsV,
+  "org.squbs"         %% "squbs-actormonitor"  % Versions.squbsV,
+  "org.squbs"         %% "squbs-actorregistry" % Versions.squbsV,
+  "org.squbs"         %% "squbs-httpclient"    % Versions.squbsV,
+  "org.squbs"         %% "squbs-admin"         % Versions.squbsV,
+  "org.json4s"        %% "json4s-native"       % Versions.json4sV,
+  "de.heikoseeberger" %% "akka-http-json4s"    % Versions.akkaHttpJson4sV,
+
+  "org.squbs"         %% "squbs-testkit"       % Versions.squbsV    % Test,
+  "com.typesafe.akka" %% "akka-http-testkit"   % Versions.akkaHttpV % Test
 )
 
 mainClass in (Compile, run) := Some("org.squbs.unicomplex.Bootstrap")

@@ -1,9 +1,21 @@
-package me.rotemfo.squbs.sample
+package me.rotemfo.squbs.hello
 
 import akka.actor._
-import akka.event.LoggingReceive
 import akka.stream.scaladsl.Source
 import akka.stream.{Attributes, DelayOverflowStrategy}
+
+import scala.concurrent.duration._
+
+// Messages for interacting with this app.
+case class PingRequest(who: String)
+
+case class PingResponse(message: String)
+
+case class ChunkRequest(who: String, delay: FiniteDuration)
+
+case class ChunkSourceMessage(source: Source[PingResponse, Any])
+
+case object EmptyRequest
 
 /**
   * The well-known-actor serves as a singleton registered entry point. It creates/manages actors to handle
@@ -14,20 +26,21 @@ import akka.stream.{Attributes, DelayOverflowStrategy}
   * What makes it well-known is being referenced in `squbs-meta.conf` and letting squbs to create the actor.
   * The path to this actor is "/user/{cube short name}/{name specified in squbs-meta.conf}"
   */
-class HelloWellKnownActor extends Actor with ActorLogging {
-  val sampleActor: ActorRef = context.actorOf(Props[HelloActor])
+class SampleWellKnownActor extends Actor with ActorLogging {
+  val sampleActor: ActorRef = context.actorOf(Props[SampleActor])
 
-  override def receive: Receive = LoggingReceive {
+  def receive: PartialFunction[Any, Unit] = {
     case request => sampleActor forward request
+
   }
 }
 
 /**
   * This is the actor that handles the request messages.
   */
-class HelloActor extends Actor with ActorLogging {
+class SampleActor extends Actor with ActorLogging {
 
-  override def receive: Receive = LoggingReceive {
+  def receive: PartialFunction[Any, Unit] = {
 
     case PingRequest(who) =>
       if (who.trim.nonEmpty) sender() ! PingResponse(s"Hello $who welcome to squbs!")

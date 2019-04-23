@@ -1,4 +1,4 @@
-package me.rotemfo.squbs.sample
+package me.rotemfo.squbs.hello
 
 import akka.http.scaladsl.model.HttpEntity.{Chunk, LastChunk}
 import akka.http.scaladsl.model.StatusCodes
@@ -10,25 +10,26 @@ import org.scalatest.{FlatSpecLike, Matchers}
 import org.squbs.testkit.{CustomRouteTestKit, TestRoute}
 
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
-class HelloHttpServiceSpec extends CustomRouteTestKit(resources = Seq.empty, withClassPath = true)
+class SampleHttpServiceSpec extends CustomRouteTestKit(resources = Seq.empty, withClassPath = true)
   with FlatSpecLike with Matchers {
 
-  implicit val timeout: RouteTestTimeout = RouteTestTimeout(5.seconds)
+  implicit val timeout: RouteTestTimeout = RouteTestTimeout(5 seconds)
 
-  val route: Route = TestRoute[HelloHttpService]
+  val route: Route = TestRoute[SampleHttpService]
 
   behavior of "SampleHttpService"
 
   it should "handle simple request correctly" in {
     Get() ~> route ~> check {
-      responseAs[String] should be ("Hello!")
+      responseAs[String] should be("Hello!")
     }
   }
 
   it should "handle path correctly" in {
     Get("/hello") ~> route ~> check {
-      responseAs[String] should be ("Hello anonymous welcome to squbs!")
+      responseAs[String] should be("Hello anonymous welcome to squbs!")
     }
   }
 
@@ -37,13 +38,13 @@ class HelloHttpServiceSpec extends CustomRouteTestKit(resources = Seq.empty, wit
     implicit val serialization: Serialization.type = native.Serialization
     implicit val formats: DefaultFormats.type = DefaultFormats
     Get("/hello/foo") ~> route ~> check {
-      responseAs[PingResponse] should be (PingResponse("Hello foo welcome to squbs!"))
+      responseAs[PingResponse] should be(PingResponse("Hello foo welcome to squbs!"))
     }
   }
 
   it should "return bad request for path segment representing space" in {
     Get("/hello/%20") ~> route ~> check {
-      status should be (StatusCodes.BadRequest)
+      status should be(StatusCodes.BadRequest)
     }
   }
 
@@ -55,7 +56,7 @@ class HelloHttpServiceSpec extends CustomRouteTestKit(resources = Seq.empty, wit
         Chunk("to ") ::
         Chunk("squbs!") ::
         LastChunk :: Nil
-      chunks should be (expected)
+      chunks should be(expected)
     }
   }
 
@@ -67,7 +68,7 @@ class HelloHttpServiceSpec extends CustomRouteTestKit(resources = Seq.empty, wit
         Chunk("to ") ::
         Chunk("squbs!") ::
         LastChunk :: Nil
-      chunks should be (expected)
+      chunks should be(expected)
     }
   }
 
@@ -76,7 +77,7 @@ class HelloHttpServiceSpec extends CustomRouteTestKit(resources = Seq.empty, wit
     implicit val serialization: Serialization.type = native.Serialization
     implicit val formats: DefaultFormats.type = DefaultFormats
     Post("/hello", PingRequest("bar")) ~> route ~> check {
-      responseAs[PingResponse] should be (PingResponse("Hello bar welcome to squbs!"))
+      responseAs[PingResponse] should be(PingResponse("Hello bar welcome to squbs!"))
     }
   }
 
@@ -85,7 +86,7 @@ class HelloHttpServiceSpec extends CustomRouteTestKit(resources = Seq.empty, wit
     implicit val serialization: Serialization.type = native.Serialization
     implicit val formats: DefaultFormats.type = DefaultFormats
     Post("/hello", PingRequest("")) ~> route ~> check {
-      status should be (StatusCodes.BadRequest)
+      status should be(StatusCodes.BadRequest)
     }
   }
 }

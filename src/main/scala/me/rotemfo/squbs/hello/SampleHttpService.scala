@@ -1,4 +1,4 @@
-package me.rotemfo.squbs.sample
+package me.rotemfo.squbs.hello
 
 import akka.http.scaladsl.model.HttpEntity.{Chunk, LastChunk}
 import akka.http.scaladsl.model.headers.RawHeader
@@ -12,46 +12,23 @@ import org.squbs.actorregistry.ActorLookup
 import org.squbs.unicomplex.RouteDefinition
 
 import scala.concurrent.duration._
+import scala.language.postfixOps
 import scala.util.Success
 
 /**
   * The route definition.
   */
-class HelloHttpService extends RouteDefinition {
+class SampleHttpService extends RouteDefinition {
 
-  implicit val timeout: Timeout = 1.seconds
-
-  override def route: Route =
-    get {
-      anonymous ~ withName ~ chunks
-    } ~
-      post {
-        withPost
-      } ~
-      complete("Hello!")
-
-  private val anonymous: Route =
+  implicit val timeout: Timeout = 3 seconds
+  private val anonymous =
     path("hello") {
       onComplete(ActorLookup ? PingRequest("anonymous")) {
         case Success(PingResponse(message)) => complete(message)
         case _ => complete(StatusCodes.BadRequest)
       }
     }
-
-  private val withPost: Route =
-    path("hello") {
-      // Configuration for Json4sSupport
-      implicit val serialization: Serialization.type = native.Serialization
-      implicit val formats: DefaultFormats.type = DefaultFormats
-      entity(as[PingRequest]) { request =>
-        onComplete(ActorLookup ? request) {
-          case Success(response: PingResponse) => complete(response)
-          case _ => complete(StatusCodes.BadRequest)
-        }
-      }
-    }
-
-  private val withName: Route =
+  private val withName =
     path("hello" / Segment) { who =>
       // Configuration for Json4sSupport
       implicit val serialization: Serialization.type = native.Serialization
@@ -61,10 +38,9 @@ class HelloHttpService extends RouteDefinition {
         case _ => complete(StatusCodes.BadRequest)
       }
     }
-
-  private val chunks: Route =
+  private val chunks =
     path("hello" / Segment / IntNumber) { (who, delay) =>
-      onComplete(ActorLookup ? ChunkRequest(who, delay.milliseconds)) {
+      onComplete(ActorLookup ? ChunkRequest(who, delay milliseconds)) {
         case Success(srcMsg: ChunkSourceMessage) =>
           // This header is added for Chrome to handle chunking responses.  Please see
           // http://stackoverflow.com/questions/26164705/chrome-not-handling-chunked-responses-like-firefox-safari
@@ -77,4 +53,23 @@ class HelloHttpService extends RouteDefinition {
         case _ => complete(StatusCodes.BadRequest)
       }
     }
+
+  override def route: Route =
+    get {
+      anonymous ~ withName ~ chunks
+    } ~
+      post {
+        path("hello") {
+          // Configuration for Json4sSupport
+          implicit val serialization: Serialization.type = native.Serialization
+          implicit val formats: DefaultFormats.type = DefaultFormats
+          entity(as[PingRequest]) { request =>
+            onComplete(ActorLookup ? request) {
+              case Success(response: PingResponse) => complete(response)
+              case _ => complete(StatusCodes.BadRequest)
+            }
+          }
+        }
+      } ~
+      complete("Hello!")
 }
